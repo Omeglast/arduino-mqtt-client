@@ -11,33 +11,14 @@ union ArrayToIp {
 
 #include "config.h"
 
-//#define aref_voltage 3.3
 #define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
 #define ADAFRUIT_CC3000_VBAT  5
 #define ADAFRUIT_CC3000_CS    10
 Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT, SPI_CLOCK_DIVIDER);
-//#define WLAN_SSID       "/tmp/lab"
-//#define WLAN_PASS       "bitte2cucung"
-//#define WLAN_SSID       "Fraggl"
-//#define WLAN_PASS       "futurama"
 
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 Adafruit_CC3000_Client client;
 
-//TMP36
-//int tempPin = 1;        
-//int tempReading;
-
-// We're going to set our broker IP and union it to something we can use
-/*union ArrayToIp {
-  byte array[4];
-  uint32_t ip;
-};
-
-/*ArrayToIp server = {
-  192,168,2,101 }*/
-//ArrayToIp server = {10, 255, 0, 155};
-//ArrayToIp server = {155, 0, 255, 10};
 cc3000_PubSubClient mqttclient(server.ip, 1883, callback, client, cc3000);
 
 void callback (char* topic, byte* payload, unsigned int length) {
@@ -48,18 +29,12 @@ void setup(void)
   Serial.begin(115200);
   Serial.println(F("Hello, CC3000!\n"));
 
-//  analogReference(EXTERNAL);
   Serial.println(F("\nInitialising the CC3000 ..."));
   if (!cc3000.begin()) {
     Serial.println(F("Unable to initialise the CC3000! Check your wiring?"));
     for(;;);
   }
 
-/*  Serial.println(F("\nDeleting old connection profiles"));
-  if (!cc3000.deleteProfiles()) {
-    Serial.println(F("Failed!"));
-    while(1);
-  }*/
 
   /* Attempt to connect to an access point */
   char *ssid = WLAN_SSID;             /* Max 32 chars */
@@ -99,13 +74,11 @@ void setup(void)
 }
 
 void loop(void) {
-//  float temperatureF = (temperatureC * 9.0 / 5.0) + 32.0;
   
   unsigned long time = millis();
 
   // cheap tricks I tell you
   char stringTime[10];
-//  dtostrf(time, 0, 3, stringTime);
   ltoa(time, stringTime, 10);
 
   // are we still connected?
