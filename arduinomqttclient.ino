@@ -1,66 +1,74 @@
+
 #include <Adafruit_CC3000.h>
 #include <ccspi.h>
 #include <SPI.h>
 #include <cc3000_PubSubClient.h>
 
-// We're going to set our broker IP and union it to something we can use
-union ArrayToIp {
-  byte array[4];
-  uint32_t ip;
-};
-
+#include "iotapi_client.h"
 #include "config.h"
 
-#define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
-#define ADAFRUIT_CC3000_VBAT  5
-#define ADAFRUIT_CC3000_CS    10
-Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT, SPI_CLOCK_DIVIDER);
-
-#define WLAN_SECURITY   WLAN_SEC_WPA2
-Adafruit_CC3000_Client client;
-
-cc3000_PubSubClient mqttclient(server.ip, 1883, callback, client, cc3000);
+cc3000_PubSubClient mqttclient(server.ip, MQTT_PORT, callback, client, cc3000);
 
 void callback (char* topic, byte* payload, unsigned int length) {
 }
 
 void setup(void)
 {
-  Serial.begin(115200);
-  Serial.println(F("Hello, CC3000!\n"));
+  #ifdef DEBUG
+    Serial.begin(115200);
+    Serial.println(F("Hello, CC3000!\n"));
+  #endif
 
-  Serial.println(F("\nInitialising the CC3000 ..."));
+  #ifdef DEBUG
+    Serial.println(F("\nInitialising the CC3000 ..."));
+  #endif
   if (!cc3000.begin()) {
-    Serial.println(F("Unable to initialise the CC3000! Check your wiring?"));
+    #ifdef DEBUG
+      Serial.println(F("Unable to initialise the CC3000! Check your wiring?"));
+    #endif
     for(;;);
   }
 
 
   /* Attempt to connect to an access point */
-  char *ssid = WLAN_SSID;             /* Max 32 chars */
-  Serial.print(F("\nAttempting to connect to "));
-  Serial.println(ssid);
+  #ifdef DEBUG
+    char *ssid = WLAN_SSID;             /* Max 32 chars */
+    Serial.print(F("\nAttempting to connect to "));
+    Serial.println(ssid);
+  #endif
 
   /* NOTE: Secure connections are not available in 'Tiny' mode! */
   if (!cc3000.connectToAP(WLAN_SSID, WLAN_PASS, WLAN_SECURITY)) {
-    Serial.println(F("Failed!"));
+    #ifdef DEBUG
+      Serial.println(F("Failed!"));
+    #endif
     while(1);
   }
 
-  Serial.println(F("Connected to WiFi!"));
+  #ifdef DEBUG
+    Serial.println(F("Connected to WiFi!"));
+  #endif
   // Display the IP address DNS, Gateway, etc.
   while (! displayConnectionDetails()) {
     delay(1000);
   }
 
-  Serial.println(F("Connected to server ?"));
+  #ifdef DEBUG
+    Serial.println(F("Connected to server ?"));
+  #endif
   // connect to the broker
   if (!client.connected()) {
-    Serial.println("Connecting to TCP server...");
+    #ifdef DEBUG
+      Serial.println("Connecting to TCP server...");
+    #endif
     client = cc3000.connectTCP(server.ip, 1883);
-    Serial.println("Server connected");
+    #ifdef DEBUG
+      Serial.println("Server connected");
+    #endif
   } else {
-    Serial.println("Server already connected");
+    #ifdef DEBUG
+      Serial.println("Server already connected");
+    #endif
   }
 
 
@@ -68,7 +76,9 @@ void setup(void)
   if(client.connected()) {
     if (mqttclient.connect("home")) {
       mqttclient.publish("home","home");
-      Serial.println("Home connected");
+      #ifdef DEBUG
+        Serial.println("Home connected");
+      #endif
     }
   }
 }
@@ -84,11 +94,15 @@ void loop(void) {
   // are we still connected?
   if (!client.connected()) {
     client = cc3000.connectTCP(server.ip, 1883);
-    Serial.println("Server connected");
+    #ifdef DEBUG
+      Serial.println("Server connected");
+    #endif
     if(client.connected()) {
       if (mqttclient.connect("client")) {
         mqttclient.publish("home","home");
-        Serial.println("Home connected");
+        #ifdef DEBUG
+          Serial.println("Home connected");
+        #endif
       }
     }
   }
@@ -96,7 +110,9 @@ void loop(void) {
     // yep, publish that test
     mqttclient.publish("time", stringTime);
   }
-  Serial.println(stringTime);
+  #ifdef DEBUG
+    Serial.println(stringTime);
+  #endif
   delay(5000);
 }
 
@@ -108,17 +124,21 @@ bool displayConnectionDetails(void)
   
   if(!cc3000.getIPAddress(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv))
   {
-    Serial.println(F("Unable to retrieve the IP Address!\r\n"));
+    #ifdef DEBUG
+      Serial.println(F("Unable to retrieve the IP Address!\r\n"));
+    #endif
     return false;
   }
   else
   {
-    Serial.print(F("\nIP Addr: ")); cc3000.printIPdotsRev(ipAddress);
-    Serial.print(F("\nNetmask: ")); cc3000.printIPdotsRev(netmask);
-    Serial.print(F("\nGateway: ")); cc3000.printIPdotsRev(gateway);
-    Serial.print(F("\nDHCPsrv: ")); cc3000.printIPdotsRev(dhcpserv);
-    Serial.print(F("\nDNSserv: ")); cc3000.printIPdotsRev(dnsserv);
-    Serial.println();
+    #ifdef DEBUG
+      Serial.print(F("\nIP Addr: ")); cc3000.printIPdotsRev(ipAddress);
+      Serial.print(F("\nNetmask: ")); cc3000.printIPdotsRev(netmask);
+      Serial.print(F("\nGateway: ")); cc3000.printIPdotsRev(gateway);
+      Serial.print(F("\nDHCPsrv: ")); cc3000.printIPdotsRev(dhcpserv);
+      Serial.print(F("\nDNSserv: ")); cc3000.printIPdotsRev(dnsserv);
+      Serial.println();
+    #endif
     return true;
   }
 }

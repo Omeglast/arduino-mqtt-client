@@ -5,16 +5,27 @@
  * according to your needs.
  */
 
-#ifndef arduinomqttclient_config_h
-#define arduinomqttclient_config_h
+#ifndef ARDUINOMQTTCLIENT_CONFIG_H
+#define ARDUINOMQTTCLIENT_CONFIG_H
 
+/**
+ * Uncomment this line to activate verbose debug information sent to serial port
+ */
+//#define DEBUG           1
+
+/**
+ * Configure your Wifi access point
+ */
 #define WLAN_SSID       "my_wlan_ssid"
 #define WLAN_PASS       "my_wlan_password"
 
 /**
- * Ip of the MQTT server, in a reverse way.
+ * Configure your MQTT server
+ * 
+ * Ip of the MQTT server is defined in a reverse way.
  * Means that loopback 127.0.0.1 will be defined as {1, 0, 0, 127}
  */
 ArrayToIp server = {1, 0, 0, 127};
+#define MQTT_PORT 1883
 
 #endif
