@@ -3,13 +3,21 @@
 #include <SPI.h>
 #include <cc3000_PubSubClient.h>
 
+// We're going to set our broker IP and union it to something we can use
+union ArrayToIp {
+  byte array[4];
+  uint32_t ip;
+};
+
+#include "config.h"
+
 //#define aref_voltage 3.3
 #define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
 #define ADAFRUIT_CC3000_VBAT  5
 #define ADAFRUIT_CC3000_CS    10
 Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT, SPI_CLOCK_DIVIDER);
-#define WLAN_SSID       "/tmp/lab"
-#define WLAN_PASS       "bitte2cucung"
+//#define WLAN_SSID       "/tmp/lab"
+//#define WLAN_PASS       "bitte2cucung"
 //#define WLAN_SSID       "Fraggl"
 //#define WLAN_PASS       "futurama"
 
@@ -21,7 +29,7 @@ Adafruit_CC3000_Client client;
 //int tempReading;
 
 // We're going to set our broker IP and union it to something we can use
-union ArrayToIp {
+/*union ArrayToIp {
   byte array[4];
   uint32_t ip;
 };
@@ -29,7 +37,7 @@ union ArrayToIp {
 /*ArrayToIp server = {
   192,168,2,101 }*/
 //ArrayToIp server = {10, 255, 0, 155};
-ArrayToIp server = {155, 0, 255, 10};
+//ArrayToIp server = {155, 0, 255, 10};
 cc3000_PubSubClient mqttclient(server.ip, 1883, callback, client, cc3000);
 
 void callback (char* topic, byte* payload, unsigned int length) {
