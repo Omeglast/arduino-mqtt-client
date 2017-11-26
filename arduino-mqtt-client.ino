@@ -2,15 +2,17 @@
 #include <Adafruit_CC3000.h>
 #include <ccspi.h>
 #include <SPI.h>
-#include <cc3000_PubSubClient.h>
+#include "cc3000_PubSubClient.h"
 
 #include "iotapi_client.h"
 #include "config.h"
 
-cc3000_PubSubClient mqttclient(server.ip, MQTT_PORT, callback, client, cc3000);
 
 void callback (char* topic, byte* payload, unsigned int length) {
 }
+
+cc3000_PubSubClient mqttclient(server.ip, MQTT_PORT, callback, client, cc3000);
+
 
 void setup(void)
 {
