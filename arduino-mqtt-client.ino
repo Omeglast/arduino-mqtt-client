@@ -84,35 +84,16 @@ void setup(void)
     }
   }
 
+  // Start DHT Sensor
   dht.begin();
-  // Print temperature sensor details.
   #ifdef DEBUG
-    sensor_t sensor;
-    dht.temperature().getSensor(&sensor);
-    Serial.println("DHTxx Unified Sensor Example");
-    Serial.println("------------------------------------");
-    Serial.println("Temperature");
-    Serial.print  ("Sensor:       "); Serial.println(sensor.name);
-    Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
-    Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
-    Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" *C");
-    Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" *C");
-    Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" *C");  
-    Serial.println("------------------------------------");
-    // Print humidity sensor details.
-    dht.humidity().getSensor(&sensor);
-    Serial.println("------------------------------------");
-    Serial.println("Humidity");
-    Serial.print  ("Sensor:       "); Serial.println(sensor.name);
-    Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
-    Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
-    Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println("%");
-    Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println("%");
-    Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println("%");  
-    Serial.println("------------------------------------");
+    debugSensorData();
   #endif
 }
 
+/**
+ * The main loop
+ */
 void loop(void) {
   char message[10];
   
@@ -130,57 +111,42 @@ void loop(void) {
         #endif
       }
     }
-  }
-  else {
-    // yep, publish that test
-
-    //sensors_event_t event;  
-
-    // sendTemperature();
-    //sendHumidity();
+  } else {
+    // Send sensor data
     sendMessage(MQTT_TEMPERATURE_TOPIC, getTemperature(dht));
     sendMessage(MQTT_HUMIDITY_TOPIC, getHumidity(dht));
-
-    // Get humidity event and print its value.
-    /*dht.humidity().getEvent(&event);
-    if (isnan(event.relative_humidity)) {
-      #ifdef DEBUG
-        Serial.println("Error reading humidity!");
-      #endif
-    }
-    else {
-      #ifdef DEBUG
-        Serial.print("Humidity: ");
-        Serial.print(event.relative_humidity);
-        Serial.println("%");
-      #endif
-      dtostrf(event.relative_humidity, 2, 3, message);
-      //mqttclient.publish(MQTT_HUMIDITY_TOPIC, message);
-      sendMessage(MQTT_HUMIDITY_TOPIC, message);
-    }*/
   }
   delay(DELAY);
 }
 
-// void sendTemperature() {
-//   sensors_event_t event;  
-//   char message[10];
-//   dht.temperature().getEvent(&event);
-//   if (isnan(event.temperature)) {
-//     #ifdef DEBUG
-//       Serial.println("Error reading temperature!");
-//     #endif
-//   }
-//   else {
-//     #ifdef DEBUG
-//       Serial.print("Temperature: ");
-//       Serial.print(event.temperature);
-//       Serial.println(" *C");
-//     #endif
-//     dtostrf(event.temperature, 2, 3, message);
-//     sendMessage(MQTT_TEMPERATURE_TOPIC, message);
-//   }
-// }
+/**
+ * Debug data from DHT sensor
+ */
+void debugSensorData() {
+  sensor_t sensor;
+  dht.temperature().getSensor(&sensor);
+  Serial.println("DHTxx Unified Sensor Example");
+  Serial.println("------------------------------------");
+  Serial.println("Temperature");
+  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" *C");
+  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" *C");
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" *C");  
+  Serial.println("------------------------------------");
+  // Print humidity sensor details.
+  dht.humidity().getSensor(&sensor);
+  Serial.println("------------------------------------");
+  Serial.println("Humidity");
+  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println("%");
+  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println("%");
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println("%");  
+  Serial.println("------------------------------------");
+}
 
 /**
  * Read humidity value from DHT sensor
@@ -219,16 +185,16 @@ char* getTemperature(DHT_Unified dhtSensor) {
   char message[10];
   dhtSensor.temperature().getEvent(&event);
   if (isnan(event.temperature)) {
-      #ifdef DEBUG
-          Serial.println("Error reading temperature!");
-      #endif
+    #ifdef DEBUG
+      Serial.println("Error reading temperature!");
+    #endif
   } else {
-      #ifdef DEBUG
-          Serial.print("Temperature: ");
-          Serial.print(event.temperature);
-          Serial.println(" *C");
-      #endif
-      dtostrf(event.temperature, 2, 3, message);
+    #ifdef DEBUG
+      Serial.print("Temperature: ");
+      Serial.print(event.temperature);
+      Serial.println(" *C");
+    #endif
+    dtostrf(event.temperature, 2, 3, message);
   }
   return message;
 }
