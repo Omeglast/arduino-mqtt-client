@@ -26,6 +26,19 @@
  * Means that loopback 127.0.0.1 will be defined as {1, 0, 0, 127}
  */
 ArrayToIp server = {1, 0, 0, 127};
-#define MQTT_PORT 1883
+#define MQTT_PORT              1883
+#define MQTT_TEMPERATURE_TOPIC "sensor/arduino/temperature"
+#define MQTT_HUMIDITY_TOPIC    "sensor/arduino/humidity"
+
+/**
+ * Configure DHT sensor
+ */
+#define DHTPIN            2
+#define DHTTYPE           DHT11
+
+/**
+ * Refresh delay in miliseconds
+ */
+#define DELAY             5000
 
 #endif
