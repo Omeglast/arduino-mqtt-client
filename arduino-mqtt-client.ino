@@ -10,6 +10,8 @@
 #include "iotapi_client.h"
 #include "config.h"
 
+void sendMessage(char* topic, char* message);
+
 void callback (char* topic, byte* payload, unsigned int length) {
 }
 
@@ -21,11 +23,9 @@ void setup(void)
   #ifdef DEBUG
     Serial.begin(115200);
     Serial.println(F("Hello, CC3000!\n"));
-  #endif
-
-  #ifdef DEBUG
     Serial.println(F("\nInitialising the CC3000 ..."));
   #endif
+
   if (!cc3000.begin()) {
     #ifdef DEBUG
       Serial.println(F("Unable to initialise the CC3000! Check your wiring?"));
@@ -116,12 +116,6 @@ void setup(void)
 void loop(void) {
   char message[10];
   
-  //unsigned long time = millis();
-
-  // cheap tricks I tell you
-  //char stringTime[10];
-  //ltoa(time, stringTime, 10);
-
   // are we still connected?
   if (!client.connected()) {
     client = cc3000.connectTCP(server.ip, 1883);
@@ -140,25 +134,15 @@ void loop(void) {
   else {
     // yep, publish that test
 
-    sensors_event_t event;  
-    dht.temperature().getEvent(&event);
-    if (isnan(event.temperature)) {
-      #ifdef DEBUG
-        Serial.println("Error reading temperature!");
-      #endif
-    }
-    else {
-      #ifdef DEBUG
-        Serial.print("Temperature: ");
-        Serial.print(event.temperature);
-        Serial.println(" *C");
-      #endif
-      dtostrf(event.temperature, 2, 3, message);
-      mqttclient.publish(MQTT_TEMPERATURE_TOPIC, message);
-    }
+    //sensors_event_t event;  
+
+    // sendTemperature();
+    //sendHumidity();
+    sendMessage(MQTT_TEMPERATURE_TOPIC, getTemperature(dht));
+    sendMessage(MQTT_HUMIDITY_TOPIC, getHumidity(dht));
 
     // Get humidity event and print its value.
-    dht.humidity().getEvent(&event);
+    /*dht.humidity().getEvent(&event);
     if (isnan(event.relative_humidity)) {
       #ifdef DEBUG
         Serial.println("Error reading humidity!");
@@ -171,12 +155,90 @@ void loop(void) {
         Serial.println("%");
       #endif
       dtostrf(event.relative_humidity, 2, 3, message);
-      mqttclient.publish(MQTT_HUMIDITY_TOPIC, message);
-    }
-    
-    //mqttclient.publish(TOPIC, stringTime);
+      //mqttclient.publish(MQTT_HUMIDITY_TOPIC, message);
+      sendMessage(MQTT_HUMIDITY_TOPIC, message);
+    }*/
   }
-  delay(5000);
+  delay(DELAY);
 }
 
+// void sendTemperature() {
+//   sensors_event_t event;  
+//   char message[10];
+//   dht.temperature().getEvent(&event);
+//   if (isnan(event.temperature)) {
+//     #ifdef DEBUG
+//       Serial.println("Error reading temperature!");
+//     #endif
+//   }
+//   else {
+//     #ifdef DEBUG
+//       Serial.print("Temperature: ");
+//       Serial.print(event.temperature);
+//       Serial.println(" *C");
+//     #endif
+//     dtostrf(event.temperature, 2, 3, message);
+//     sendMessage(MQTT_TEMPERATURE_TOPIC, message);
+//   }
+// }
 
+/**
+ * Read humidity value from DHT sensor
+ * 
+ * @param DHT_Unified sensor
+ * @return char*
+ */
+char* getHumidity(DHT_Unified dhtSensor) {
+  sensors_event_t event;  
+  char message[10];
+  dhtSensor.humidity().getEvent(&event);
+  if (isnan(event.relative_humidity)) {
+    #ifdef DEBUG
+      Serial.println("Error reading temperature!");
+    #endif
+  }
+  else {
+    #ifdef DEBUG
+      Serial.print("Humidity: ");
+      Serial.print(event.relative_humidity);
+      Serial.println("%");
+    #endif
+    dtostrf(event.relative_humidity, 2, 3, message);
+  }
+  return message;
+}
+
+/**
+ * Read temperature value from DHT sensor
+ * 
+ * @param DHT_Unified sensor
+ * @return char*
+ */
+char* getTemperature(DHT_Unified dhtSensor) {
+  sensors_event_t event;  
+  char message[10];
+  dhtSensor.temperature().getEvent(&event);
+  if (isnan(event.temperature)) {
+      #ifdef DEBUG
+          Serial.println("Error reading temperature!");
+      #endif
+  } else {
+      #ifdef DEBUG
+          Serial.print("Temperature: ");
+          Serial.print(event.temperature);
+          Serial.println(" *C");
+      #endif
+      dtostrf(event.temperature, 2, 3, message);
+  }
+  return message;
+}
+
+/**
+ * Send Message to the MQTT server
+ * @param char* topic
+ * @param char* message
+ */
+void sendMessage(char* topic, char* message)
+{
+  mqttclient.publish(topic, message);
+}
